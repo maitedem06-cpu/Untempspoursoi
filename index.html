@@ -77,9 +77,9 @@ button:disabled{opacity:.45;cursor:default}
 .prog{text-align:center;color:var(--soft);margin:12px 0 0}
 #exview[hidden],#exlist[hidden]{display:none}
 
-:root{--tint:#f6ddd8;--hol:#cfd6c4}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tint:#4a2222;--hol:#3e4a3a}}
-:root[data-theme="dark"]{--tint:#4a2222;--hol:#3e4a3a}
+:root{--tint:#f6ddd8;--hol:#cfd6c4;--tc:#b85c3e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tint:#4a2222;--hol:#3e4a3a;--tc:#e49a80}}
+:root[data-theme="dark"]{--tint:#4a2222;--hol:#3e4a3a;--tc:#e49a80}
 [hidden]{display:none!important}
 .seg4{flex-wrap:nowrap}.seg4 button{padding:12px 6px;font-size:15px}
 body.cp img.logo,body.cp .hd{display:none}
@@ -88,11 +88,15 @@ body.cp h1{font-size:30px;margin:4px 0 12px}
 .mn h2{margin:0;text-align:center;flex:1}.mn button{min-width:52px;font-size:22px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
 .cal .wd{font:600 12px "Open Sans",system-ui,sans-serif;text-align:center;color:var(--soft)}
-.cal button.d{aspect-ratio:1;min-height:0;padding:0;border-radius:12px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);font:600 15px "Open Sans",system-ui,sans-serif;position:relative}
+.cal button.d{aspect-ratio:1;width:100%;min-width:0;min-height:0;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);font:600 15px "Open Sans",system-ui,sans-serif;position:relative}
 .cal button.we{background:var(--tint)}.cal button.hol{background:var(--hol)}
 .cal button.today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
 .cal button.sel{outline:3px solid var(--ink);outline-offset:1px}
-.cal button.dot::after{content:"";position:absolute;bottom:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:currentColor}
+.cal .nd{width:8px;height:8px;border-radius:50%;background:#c23b6b;box-shadow:0 0 0 1.5px #fff7ef;visibility:hidden;flex:none}
+.cal .nd.on{visibility:visible}
+.mph{text-align:center;margin:2px 6px 8px}
+.mph b{display:block;font:italic 600 27px/1.15 "Crimson Pro",Georgia,serif;color:var(--tc)}
+.mph span{display:block;margin-top:6px;color:var(--soft);font-size:16px;line-height:1.4}
 textarea,.br input,.ti-in{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);color:var(--ink);font:400 16px "Open Sans",system-ui,sans-serif}
 textarea{min-height:96px;margin-top:8px;resize:vertical}
 .bs{margin-top:16px}
@@ -165,6 +169,7 @@ details.box input{width:100%;margin-top:8px;border:1.5px solid var(--line);borde
 <h2>Mon planner 2027</h2>
 <div class="row seg4" role="group" aria-label="Planner"><button data-p="cal" aria-pressed="true">Calendrier</button><button data-p="bud" aria-pressed="false">Budget</button><button data-p="todo" aria-pressed="false">À faire</button></div>
 <div class="mn"><button class="ghost" id="pprev" aria-label="Mois précédent">‹</button><h2 id="pmonth"></h2><button class="ghost" id="pnext" aria-label="Mois suivant">›</button></div>
+<div class="mph" id="pphrase"></div>
 <div id="p-cal"></div><div id="p-bud" hidden></div><div id="p-todo" hidden></div>
 <div class="box" id="p-inst" hidden><b>Ajoute l’application à ton écran d’accueil</b>Tes notes y sont mieux protégées. iPhone : touche le bouton Partager, puis « Sur l’écran d’accueil ». Android : touche ⋮ puis « Installer l’application ».</div>
 <div class="box" id="p-save"><b>Mes notes en sécurité</b>Ton planner est enregistré sur ce téléphone. Fais une sauvegarde de temps en temps pour tout retrouver si tu changes de téléphone.
@@ -386,7 +391,7 @@ exList();
 
 /* ===== Planner 2027 ===== */
 const PY=2027,PM=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-const PAFF=[["Je recommence","Je peux décider que quelque chose de nouveau commence aujourd’hui."],["Je me parle avec amour","Aujourd’hui, je choisis des mots plus doux envers moi-même."],["Je laisse entrer le beau","De belles choses peuvent encore m’arriver."],["Je fais confiance à mon chemin","Chaque petit pas me rapproche de ce qui m’attend."],["Je m’autorise à être heureuse","Je n’attends pas que tout soit parfait pour apprécier aujourd’hui."],["Je célèbre mes petits pas","Je n’attends pas d’être arrivée pour être fière de moi."],["Je mérite cette pause","Je n’ai pas besoin d’avoir tout terminé pour avoir le droit de me reposer."],["Je ralentis sans culpabiliser","Ralentir ne signifie pas abandonner."],["Je suis fière de moi","J’ai traversé tellement de choses et pourtant je suis là."],["Je laisse partir","Je n’ai pas besoin de tout emporter avec moi."],["Ma douceur est une force","Je peux être douce sans être faible."],["Je me choisis","Aujourd’hui, je m’accorde la même douceur que celle que j’offre aux autres."]];
+const PAFF=[["J’ose rêver grand","Cette année, mes envies ont le droit de voir grand."],["J’ose dire ce que je ressens","Mes émotions sont une information, pas une faiblesse."],["J’ose dire non","Dire non à une chose, c’est dire oui à ce qui compte vraiment."],["J’ose demander de l’aide","Je n’ai pas à tout porter toute seule."],["J’ose prendre ma place","Ma voix et mes idées méritent d’être entendues."],["J’ose me faire confiance","Je sais déjà plus de choses que je ne le crois."],["J’ose ne rien faire","Le repos aussi est une façon de prendre soin de moi."],["J’ose savourer","Je profite de l’instant, sans rien avoir à prouver."],["J’ose recommencer","Je repars à mon rythme, avec ce que j’ai appris."],["J’ose lâcher prise","Je laisse partir ce qui m’alourdit et je garde ce qui me fait du bien."],["J’ose recevoir","J’accepte la douceur, les compliments et l’aide qu’on m’offre."],["J’ose être fière de moi","Je remercie la femme que je suis devenue cette année."]];
 const PRIT=[["Écris ce qui t’encombre","Prends une feuille et écris tout ce qui occupe ton esprit. Ne réfléchis pas. Ne corrige rien. Dépose simplement."],["Prends soin de tes mains","Applique un peu de crème ou d’huile. Masse lentement tes paumes, tes doigts et le dessus de tes mains pendant quelques minutes."],["Prends l’air","Sors quelques minutes ou ouvre simplement une fenêtre. Respire profondément et observe ce qui t’entoure."],["Marche sans but","Marche cinq minutes sans téléphone. Ne cherche pas à arriver quelque part : observe simplement."],["Trouve 3 petits bonheurs","Pense à trois choses agréables de ta journée. Même toutes petites."],["Bois en pleine conscience","Prépare-toi une boisson que tu aimes. Assieds-toi et bois-la sans téléphone et sans faire autre chose en même temps."],["Offre-toi du silence","Éteins tout ce que tu peux éteindre. Pendant quelques minutes, écoute simplement le silence autour de toi."],["Crée ton cocon","Une lumière douce, un plaid, une bougie, une boisson chaude… Transforme cinq minutes ordinaires en un moment pour toi."],["Allège ta journée","Choisis une chose non essentielle sur ta liste et autorise-toi à ne pas la faire aujourd’hui."],["Écoute ta chanson","Choisis une musique qui te fait du bien. Ferme les yeux et écoute-la jusqu’au bout, sans rien faire d’autre."],["Libère tes épaules","Monte doucement les épaules vers les oreilles. Maintiens quelques secondes puis relâche complètement. Répète cinq fois."],["Prends rendez-vous avec toi","Choisis un moment cette semaine uniquement pour toi et inscris-le dans ton agenda."]];
 const PQST=["De quoi ai-je besoin aujourd’hui ?","Qu’est-ce qui me fait vraiment du bien ?","Qu’est-ce que je remets toujours à plus tard ?","Quelle limite ai-je besoin de poser ?","De quoi suis-je fière ?","Qu’est-ce que mon corps me demande aujourd’hui ?","Quand ai-je pris du temps pour moi pour la dernière fois ?","Qu’est-ce qui me rend heureuse quand personne ne regarde ?","Qu’est-ce qui prend trop de place dans mon esprit ?","Qu’est-ce que j’ai envie de laisser derrière moi ?","Est-ce que je me parle comme à quelqu’un que j’aime ?","Quelle promesse ai-je envie de me faire ?"];
 const PS=["Janv.","Févr.","Mars","Avr.","Mai","Juin","Juil.","Août","Sept.","Oct.","Nov.","Déc."];
@@ -417,7 +422,8 @@ function styleDay(b,k){
  const c=PL.col[k];
  if(c!=null&&TAGS[c]){b.style.background=TAGS[c][0];b.style.color=TAGS[c][1];b.style.borderColor=TAGS[c][0]}
  else{b.style.background="";b.style.color="";b.style.borderColor=""}
- b.classList.toggle("dot",!!PL.notes[k])}
+ const n=b.querySelector(".nd");if(n)n.classList.toggle("on",!!PL.notes[k]);
+ if(b.dataset.al)b.setAttribute("aria-label",b.dataset.al+(PL.notes[k]?", avec une note":""))}
 function sumUpdate(){
  const n=[0,0,0,0,0],pre=PY+"-"+pad(pm)+"-";
  Object.keys(PL.col).forEach(k=>{if(k.startsWith(pre)&&PL.col[k]>=0&&PL.col[k]<5)n[PL.col[k]]++});
@@ -425,8 +431,7 @@ function sumUpdate(){
  const e=$("#csum");if(e)e.textContent=t?"Ce mois-ci : "+t:"Aucun jour colorié ce mois-ci."}
 function renderCal(){
  const box=$("#p-cal");box.innerHTML="";
- const ph=el("div","box");ph.appendChild(el("b",null,PAFF[pm-1][0]));ph.appendChild(el("span",null,PAFF[pm-1][1]));box.appendChild(ph);
- box.appendChild(el("p","note","Touche une couleur, puis touche les jours à colorier. « Note » sert à écrire dans un jour."));
+  box.appendChild(el("p","note","Touche une couleur, puis touche les jours à colorier. « Note » sert à écrire dans un jour."));
  const chips=el("div","chips"),labs=[];
  const chip=(label,col,val)=>{const b=el("button","chip");b.setAttribute("aria-pressed",brush===val);
   if(col){const d=el("span","cd");d.style.background=col;b.appendChild(d)}
@@ -441,14 +446,14 @@ function renderCal(){
  for(let i=0;i<off;i++)g.appendChild(el("div"));
  const memo=[];
  for(let d=1;d<=nd;d++){
-  const k=PY+"-"+pad(pm)+"-"+pad(d),b=el("button","d",String(d));
+  const k=PY+"-"+pad(pm)+"-"+pad(d),b=el("button","d");b.appendChild(el("span","dn",String(d)));b.appendChild(el("span","nd"));
   if((off+d-1)%7>=5)b.classList.add("we");
   if(HOL[k])b.classList.add("hol");
   if(HOL[k]||SPE[k])memo.push(d+" "+PM[pm-1].toLowerCase()+" : "+(HOL[k]||SPE[k]));
   if(k===today)b.classList.add("today");
   if(k===pd&&brush===null)b.classList.add("sel");
+  b.dataset.al=d+" "+PM[pm-1]+(HOL[k]?", "+HOL[k]:"");
   styleDay(b,k);
-  b.setAttribute("aria-label",d+" "+PM[pm-1]+(HOL[k]?", "+HOL[k]:""));
   b.onclick=()=>{
    if(brush===null){pd=k;renderCal();return}
    if(brush==="x"||PL.col[k]===brush)delete PL.col[k];else PL.col[k]=brush;
@@ -456,7 +461,7 @@ function renderCal(){
   g.appendChild(b)}
  box.appendChild(g);
  box.appendChild(el("p","note","",)).id="csum";
- box.appendChild(el("p","note","Vert clair : jour férié en Belgique. Rose pâle : week-end. Point : une note est écrite."));
+ box.appendChild(el("p","note","Vert clair : jour férié en Belgique. Rose pâle : week-end. Point rose : une note est écrite."));
  const dt=el("details","box");dt.appendChild(el("summary",null,"Changer le nom des couleurs"));
  TAGS.forEach((c,i)=>{const t=el("input");t.type="text";t.maxLength=24;t.value=PL.tn[i];t.setAttribute("aria-label","Nom de la couleur "+(i+1));
   t.oninput=()=>{PL.tn[i]=t.value.trim()||TN0[i];psave();labs[i].textContent=PL.tn[i];sumUpdate()};dt.appendChild(t)});
@@ -468,7 +473,7 @@ function renderCal(){
   if(HOL[pd]||SPE[pd])bx.appendChild(el("span",null,HOL[pd]||SPE[pd]));
   const ta=el("textarea");ta.placeholder="Un rendez-vous, une idée, une envie…";ta.value=PL.notes[pd]||"";ta.setAttribute("aria-label","Note du jour");
   ta.oninput=()=>{if(ta.value.trim())PL.notes[pd]=ta.value;else delete PL.notes[pd];psave();
-   const sb=box.querySelector("button.sel");if(sb)sb.classList.toggle("dot",!!PL.notes[pd])};
+   const sb=box.querySelector("button.sel");if(sb)styleDay(sb,pd)};
   bx.appendChild(ta);box.appendChild(bx)}
  if(memo.length){const bx=el("div","box");bx.appendChild(el("b",null,"À retenir ce mois-ci"));memo.forEach(m=>bx.appendChild(el("div",null,m)));box.appendChild(bx)}
  const r=el("div","box");r.appendChild(el("b",null,"Mon rituel du mois : "+PRIT[pm-1][0]));r.appendChild(el("span",null,PRIT[pm-1][1]));box.appendChild(r)}
@@ -537,6 +542,7 @@ function renderTodo(){
 
 function planRender(){
  $("#pmonth").textContent=PM[pm-1]+" "+PY;
+ {const ph=$("#pphrase");ph.innerHTML="";ph.appendChild(el("b",null,PAFF[pm-1][0]));ph.appendChild(el("span",null,PAFF[pm-1][1]))}
  $("#p-cal").hidden=psub!=="cal";$("#p-bud").hidden=psub!=="bud";$("#p-todo").hidden=psub!=="todo";
  if(psub==="cal")renderCal();else if(psub==="bud")renderBud();else renderTodo()}
 document.querySelectorAll(".seg4 button[data-p]").forEach(b=>b.onclick=()=>{psub=b.dataset.p;
