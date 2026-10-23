@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Un temps pour soi</title>
+<meta name="description" content="Quelques minutes pour ralentir. Un instant pour se retrouver.">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#f4e8d8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Temps pour soi">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4e8d8;--surface:#fbf3e8;--ink:#6b1212;--soft:#8a5a56;--line:#dcc9b3;--wine:#6b1212;--cream:#f4e8d8;--sage:#9ca892;--pink:#ffd9d6;
@@ -152,6 +160,13 @@ textarea{min-height:96px;margin-top:8px;resize:vertical}
 <div class="row seg4" role="group" aria-label="Planner"><button data-p="cal" aria-pressed="true">Calendrier</button><button data-p="bud" aria-pressed="false">Budget</button><button data-p="todo" aria-pressed="false">À faire</button></div>
 <div class="mn"><button class="ghost" id="pprev" aria-label="Mois précédent">‹</button><h2 id="pmonth"></h2><button class="ghost" id="pnext" aria-label="Mois suivant">›</button></div>
 <div id="p-cal"></div><div id="p-bud" hidden></div><div id="p-todo" hidden></div>
+<div class="box" id="p-inst" hidden><b>Ajoute l’application à ton écran d’accueil</b>Tes notes y sont mieux protégées. iPhone : touche le bouton Partager, puis « Sur l’écran d’accueil ». Android : touche ⋮ puis « Installer l’application ».</div>
+<div class="box" id="p-save"><b>Mes notes en sécurité</b>Ton planner est enregistré sur ce téléphone. Fais une sauvegarde de temps en temps pour tout retrouver si tu changes de téléphone.
+<p class="note" id="lastbk"></p>
+<div class="row"><button class="primary" id="backup">Sauvegarder mes notes</button><button class="ghost" id="restore">Restaurer une sauvegarde</button></div>
+<div class="row"><button class="primary" id="rgo" hidden>Restaurer maintenant</button><button class="ghost" id="rno" hidden>Annuler</button></div>
+<input type="file" id="rfile" accept=".json,application/json" hidden>
+<p class="note" id="savemsg" aria-live="polite"></p></div>
 <p class="note">Tout ce que tu écris reste sur ton téléphone.</p>
 </section>
 
@@ -492,6 +507,51 @@ document.querySelectorAll(".seg4 button[data-p]").forEach(b=>b.onclick=()=>{psub
  document.querySelectorAll(".seg4 button[data-p]").forEach(x=>x.setAttribute("aria-pressed",x===b));planRender()});
 $("#pprev").onclick=()=>{pm=pm===1?12:pm-1;pd=null;planRender()};
 $("#pnext").onclick=()=>{pm=pm===12?1:pm+1;pd=null;planRender()};
+
+
+/* ===== Sauvegarde, restauration, installation ===== */
+const isApp=()=>window.navigator.standalone===true||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+const isObj=x=>x&&typeof x==="object"&&!Array.isArray(x);
+function cleanNotes(n){const o={};Object.keys(n).forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&typeof n[k]==="string")o[k]=n[k]});return o}
+function cleanBud(b){const o={};Object.keys(b).forEach(k=>{if(!/^\d{4}-\d{2}$/.test(k)||!isObj(b[k]))return;const m={};
+ SEC.forEach(([id,,L])=>{m[id]=Array.isArray(b[k][id])?b[k][id].filter(isObj).map(x=>({l:String(x.l==null?"":x.l),p:String(x.p==null?"":x.p),r:String(x.r==null?"":x.r),f:x.f?1:0})):L.map(l=>({l,p:"",r:"",f:1}))});o[k]=m});return o}
+function cleanTodo(t){const o={};Object.keys(t).forEach(k=>{if(/^\d{4}-\d{2}$/.test(k)&&Array.isArray(t[k]))o[k]=t[k].filter(x=>isObj(x)&&typeof x.t==="string").map(x=>({t:x.t,d:x.d?1:0,s:x.s?1:0}))});return o}
+function saveInfo(){$("#lastbk").textContent=PL.bk?"Dernière sauvegarde : "+new Date(PL.bk).toLocaleDateString("fr-BE",{day:"numeric",month:"long",year:"numeric"})+".":"Tu n’as pas encore fait de sauvegarde."}
+async function doBackup(){
+ const msg=$("#savemsg");
+ try{
+  const data=JSON.stringify({app:"un-temps-pour-soi",v:1,planner:PL,pas:S.days||[]});
+  const name="un-temps-pour-soi-sauvegarde-"+dk(new Date())+".json",f=new File([data],name,{type:"application/json"});
+  let done=false;
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+   try{await navigator.share({files:[f],title:"Sauvegarde Un temps pour soi"});done=true}
+   catch(e){if(e&&e.name==="AbortError"){msg.textContent="Sauvegarde annulée.";return}}
+  }
+  if(!done){const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=name;document.body.appendChild(a);a.click();a.remove()}
+  PL.bk=new Date().toISOString();psave();saveInfo();
+  msg.textContent=done?"Sauvegarde prête. Enregistre-la dans Fichiers et garde-la précieusement.":"Sauvegarde enregistrée dans tes téléchargements."
+ }catch(e){msg.textContent="La sauvegarde n’a pas pu se faire sur ce téléphone."}
+}
+let pend=null;
+$("#backup").onclick=doBackup;
+$("#restore").onclick=()=>$("#rfile").click();
+$("#rfile").onchange=e=>{
+ const f=e.target.files&&e.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{try{
+  const o=JSON.parse(r.result),p=o&&o.planner;
+  if(!isObj(o)||o.app!=="un-temps-pour-soi"||!isObj(p))throw 0;
+  const np={notes:cleanNotes(isObj(p.notes)?p.notes:{}),bud:cleanBud(isObj(p.bud)?p.bud:{}),todo:cleanTodo(isObj(p.todo)?p.todo:{}),bk:typeof p.bk==="string"?p.bk:""};
+  const days=Array.isArray(o.pas)?o.pas.filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)):[];
+  pend={np,days};
+  $("#savemsg").textContent="Sauvegarde lue : "+Object.keys(np.notes).length+" note(s), "+Object.keys(np.bud).length+" mois de budget, "+days.length+" jour(s) de série. Elle remplacera ce qui est écrit sur ce téléphone.";
+  $("#rgo").hidden=false;$("#rno").hidden=false;
+ }catch(err){pend=null;$("#rgo").hidden=true;$("#rno").hidden=true;$("#savemsg").textContent="Ce fichier n’est pas une sauvegarde de l’application."}};
+ r.readAsText(f);e.target.value=""};
+$("#rgo").onclick=()=>{if(!pend)return;PL=pend.np;psave();S.days=pend.days;save();pend=null;$("#rgo").hidden=true;$("#rno").hidden=true;$("#savemsg").textContent="Tes notes ont été restaurées.";saveInfo();planRender()};
+$("#rno").onclick=()=>{pend=null;$("#rgo").hidden=true;$("#rno").hidden=true;$("#savemsg").textContent="Restauration annulée."};
+$("#p-inst").hidden=isApp();
+saveInfo();
 
 function renderPas(){
  const set=new Set(S.days);let n=0;const d=new Date();
