@@ -90,9 +90,9 @@ body.cp h1{font-size:30px;margin:4px 0 12px}
 .cal .wd{font:600 12px "Open Sans",system-ui,sans-serif;text-align:center;color:var(--soft)}
 .cal button.d{aspect-ratio:1;min-height:0;padding:0;border-radius:12px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);font:600 15px "Open Sans",system-ui,sans-serif;position:relative}
 .cal button.we{background:var(--tint)}.cal button.hol{background:var(--hol)}
-.cal button.today{border-color:var(--ink);border-width:2.5px}
+.cal button.today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
 .cal button.sel{outline:3px solid var(--ink);outline-offset:1px}
-.cal button.dot::after{content:"";position:absolute;bottom:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ink)}
+.cal button.dot::after{content:"";position:absolute;bottom:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:currentColor}
 textarea,.br input,.ti-in{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);color:var(--ink);font:400 16px "Open Sans",system-ui,sans-serif}
 textarea{min-height:96px;margin-top:8px;resize:vertical}
 .bs{margin-top:16px}
@@ -112,6 +112,12 @@ textarea{min-height:96px;margin-top:8px;resize:vertical}
 .ti .ib[aria-pressed="true"]{color:var(--wine)}
 .yt{display:grid;grid-template-columns:.8fr 1.1fr 1.1fr 1fr 1.1fr;gap:3px;font-size:12.5px;padding:7px 4px;border-bottom:1px solid var(--line)}
 .yt span+span{text-align:right}.yt.h{font-weight:600;color:var(--wine)}.yt.t{background:var(--tint);border-radius:10px;font-weight:600;border:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;min-height:42px;font-size:14px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;flex:0 0 auto}
+.chip[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip .cd{width:16px;height:16px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.18)}
+details.box summary{cursor:pointer;font-weight:600}
+details.box input{width:100%;margin-top:8px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);color:var(--ink);font:400 16px "Open Sans",system-ui,sans-serif}
 @media (prefers-reduced-motion:reduce){.orb{transition:none}.card.pop{animation:none}}
 </style>
 </head>
@@ -136,7 +142,7 @@ textarea{min-height:96px;margin-top:8px;resize:vertical}
 <div class="row seg2" role="group" aria-label="Type de respiration"><button data-k="coh" aria-pressed="true">Lente</button><button data-k="car" aria-pressed="false">Carrée</button><button data-k="tri" aria-pressed="false">Triangle</button></div>
 <p id="modeinfo">Inspire 5 secondes par le nez, expire 5 secondes par la bouche.</p>
 <p class="note" style="margin:14px 0 6px">Son</p>
-<div class="row seg3" role="group" aria-label="Son"><button data-s="bowl" aria-pressed="true">Bol tibétain</button><button data-s="wave" aria-pressed="false">Vagues</button><button data-s="none" aria-pressed="false">Aucun</button></div>
+<div class="row seg3" role="group" aria-label="Son"><button data-s="bowl" aria-pressed="true">Bol tibétain</button><button data-s="pad" aria-pressed="false">Nappe douce</button><button data-s="none" aria-pressed="false">Aucun</button></div>
 <div class="row"><button class="ghost" id="tst">Écouter un aperçu</button></div>
 <p class="note" id="sndmsg" hidden>Le son ne démarre pas. Vérifie le volume et le mode silencieux de ton téléphone, ou ouvre la page dans Safari.</p>
 <div class="row seg" role="group" aria-label="Durée"><button data-m="1" aria-pressed="false">1 min</button><button data-m="3" aria-pressed="true">3 min</button><button data-m="5" aria-pressed="false">5 min</button></div>
@@ -252,7 +258,7 @@ $("#autre").onclick=()=>draw(cur);
 $("#fait").onclick=()=>{mark();$("#fait").textContent="Merci pour ce moment";$("#fait").disabled=true};
 
 let mins=3,mode="coh",sound="bowl",timer=null,left=0,run=false,pv=false,AC=null,src=null,master=null,nodes=[],sil=null,silT=null,wl=null;
-const BUF={},TST="Écouter un aperçu";
+const TST="Écouter un aperçu";
 const MODES={
  coh:[["Inspire",5,1,0],["Expire",5,0,2]],
  car:[["Inspire",4,1,0],["Retiens",4,1,1],["Expire",4,0,2],["Retiens",4,0,3]],
@@ -277,22 +283,17 @@ function unmute(){
  try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){}
  try{if(!sil){sil=new Audio(SILWAV);sil.loop=true}sil.play().catch(()=>{})}catch(e){}
 }
-function mkBuf(key){
- if(BUF[key])return BUF[key];
- const segs=MODES[key];let T=0;segs.forEach(g=>T+=g[1]);
- const sr=AC.sampleRate,N=Math.round(sr*T),b=AC.createBuffer(1,N,sr),f=b.getChannelData(0);
- let lvl=0.3,i=0,y1=0,y2=0,pk=0;
- segs.forEach(g=>{const n=Math.round(sr*g[1]),from=lvl,to=g[2]?1:0.3;
-  for(let k=0;k<n&&i<N;k++,i++){
-   const e=from+(to-from)*(0.5-0.5*Math.cos(Math.PI*k/n));
-   const a=1-Math.exp(-2*Math.PI*(500+2600*e*e)/sr);
-   y1+=a*(Math.random()*2-1-y1);y2+=a*(y1-y2);
-   const v=y2*e*(1+0.18*Math.sin(6.283*0.9*i/sr))/Math.sqrt(a);
-   f[i]=v;const m=v<0?-v:v;if(m>pk)pk=m}
-  lvl=to});
- const sc=0.9/pk,fd=Math.round(sr*0.04);
- for(let k=0;k<N;k++){let g=sc;if(k<fd)g*=k/fd;else if(k>N-fd)g*=(N-k)/fd;f[k]*=g}
- return BUF[key]=b}
+function padSession(preview){
+ const t0=AC.currentTime+0.1,g=AC.createGain();g.gain.value=0.0001;g.connect(master);
+ [[220,0.5],[329.63,0.9],[440,0.7],[493.88,0.35],[659.25,0.3]].forEach(([f,a])=>{
+  [-3,3].forEach(c=>{const o=AC.createOscillator(),v=AC.createGain();o.type="sine";o.frequency.value=f;o.detune.value=c;
+   v.gain.value=a*0.5;o.connect(v);v.connect(g);o.start(t0);nodes.push(o)})});
+ const P=preview?[["Inspire",4,1],["Expire",4,0]]:MODES[mode],total=preview?8:mins*60,LO=0.07,HI=0.28;
+ g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(LO,t0+0.4);
+ let t=t0+0.4,i=0,lvl=LO;
+ while(t<t0+total){const ph=P[i%P.length],to=ph[2]?HI:LO;g.gain.setValueAtTime(lvl,t);g.gain.linearRampToValueAtTime(to,t+ph[1]);lvl=to;t+=ph[1];i++}
+ g.gain.setValueAtTime(lvl,t);g.gain.linearRampToValueAtTime(0.0001,t+2);
+ nodes.forEach(o=>o.stop(t+2.1))}
 function strike(t,k,dur){
  const [f,v,dm]=BOWL[k],len=Math.min(dur*dm+1.5,7);
  [[1,1,1],[1.004,0.7,1],[2.76,0.4,0.6],[5.4,0.15,0.35]].forEach(([r,a,dl])=>{
@@ -309,8 +310,8 @@ function startSound(preview){
   AC=AC||new (window.AudioContext||window.webkitAudioContext)();
   if(AC.state!=="running")AC.resume();
   master=AC.createGain();master.connect(AC.destination);
-  if(sound==="wave"){
-   src=AC.createBufferSource();src.buffer=mkBuf(mode);src.loop=true;src.connect(master);src.start(0)
+  if(sound==="pad"){
+   padSession(preview)
   }else if(preview){
    const t=AC.currentTime+0.1;strike(t,0,5);strike(t+4,2,5)
   }else{
@@ -399,6 +400,8 @@ const HOL={},SPE={};
  [[new Date(PY,1,14),"Saint-Valentin"],[sun(4,2),"Fête des mères"],[sun(5,2),"Fête des pères"],[new Date(PY,11,6),"Saint-Nicolas"]].forEach(([d,l])=>SPE[dk(d)]=l)})();
 let PL={notes:{},bud:{},todo:{}},pm=1,pd=null,psub="cal",byear=false;
 try{const r=localStorage.getItem("utps_pl");if(r)PL=Object.assign(PL,JSON.parse(r))}catch(e){}
+if(!PL.col||typeof PL.col!=="object"||Array.isArray(PL.col))PL.col={};
+if(!Array.isArray(PL.tn)||PL.tn.length!==5)PL.tn=["Travail","Congé","Activité","Atelier / vente","Pour moi"];
 const psave=()=>{try{localStorage.setItem("utps_pl",JSON.stringify(PL))}catch(e){}};
 {const t=new Date();if(t.getFullYear()===PY)pm=t.getMonth()+1}
 const mk=()=>PY+"-"+pad(pm);
@@ -407,9 +410,32 @@ const eur=x=>x.toLocaleString("fr-BE",{minimumFractionDigits:0,maximumFractionDi
 function el(tag,cls,tx){const e=document.createElement(tag);if(cls)e.className=cls;if(tx!=null)e.textContent=tx;return e}
 function bud(k){if(!PL.bud[k]){PL.bud[k]={};SEC.forEach(([id,,L])=>PL.bud[k][id]=L.map(l=>({l,p:"",r:"",f:1})))}return PL.bud[k]}
 
+const TAGS=[["#6b1212","#f4e8d8"],["#9ca892","#3b0a0a"],["#b85c3e","#fff7ef"],["#f0b8b0","#6b1212"],["#d8c7a3","#4a2a14"]];
+const TN0=["Travail","Congé","Activité","Atelier / vente","Pour moi"];
+let brush=null;
+function styleDay(b,k){
+ const c=PL.col[k];
+ if(c!=null&&TAGS[c]){b.style.background=TAGS[c][0];b.style.color=TAGS[c][1];b.style.borderColor=TAGS[c][0]}
+ else{b.style.background="";b.style.color="";b.style.borderColor=""}
+ b.classList.toggle("dot",!!PL.notes[k])}
+function sumUpdate(){
+ const n=[0,0,0,0,0],pre=PY+"-"+pad(pm)+"-";
+ Object.keys(PL.col).forEach(k=>{if(k.startsWith(pre)&&PL.col[k]>=0&&PL.col[k]<5)n[PL.col[k]]++});
+ const t=n.map((x,i)=>x?PL.tn[i]+" : "+x:"").filter(Boolean).join("  ·  ");
+ const e=$("#csum");if(e)e.textContent=t?"Ce mois-ci : "+t:"Aucun jour colorié ce mois-ci."}
 function renderCal(){
  const box=$("#p-cal");box.innerHTML="";
  const ph=el("div","box");ph.appendChild(el("b",null,PAFF[pm-1][0]));ph.appendChild(el("span",null,PAFF[pm-1][1]));box.appendChild(ph);
+ box.appendChild(el("p","note","Touche une couleur, puis touche les jours à colorier. « Note » sert à écrire dans un jour."));
+ const chips=el("div","chips"),labs=[];
+ const chip=(label,col,val)=>{const b=el("button","chip");b.setAttribute("aria-pressed",brush===val);
+  if(col){const d=el("span","cd");d.style.background=col;b.appendChild(d)}
+  const t=el("span",null,label);b.appendChild(t);
+  b.onclick=()=>{brush=(brush===val&&val!==null)?null:val;renderCal()};chips.appendChild(b);return t};
+ chip("Note",null,null);
+ TAGS.forEach((c,i)=>{labs[i]=chip(PL.tn[i],c[0],i)});
+ chip("Gomme",null,"x");
+ box.appendChild(chips);
  const g=el("div","cal");["L","M","M","J","V","S","D"].forEach(d=>g.appendChild(el("div","wd",d)));
  const off=(new Date(PY,pm-1,1).getDay()+6)%7,nd=new Date(PY,pm,0).getDate(),today=dk(new Date());
  for(let i=0;i<off;i++)g.appendChild(el("div"));
@@ -419,20 +445,30 @@ function renderCal(){
   if((off+d-1)%7>=5)b.classList.add("we");
   if(HOL[k])b.classList.add("hol");
   if(HOL[k]||SPE[k])memo.push(d+" "+PM[pm-1].toLowerCase()+" : "+(HOL[k]||SPE[k]));
-  if(PL.notes[k])b.classList.add("dot");
   if(k===today)b.classList.add("today");
-  if(k===pd)b.classList.add("sel");
+  if(k===pd&&brush===null)b.classList.add("sel");
+  styleDay(b,k);
   b.setAttribute("aria-label",d+" "+PM[pm-1]+(HOL[k]?", "+HOL[k]:""));
-  b.onclick=()=>{pd=k;renderCal()};g.appendChild(b)}
+  b.onclick=()=>{
+   if(brush===null){pd=k;renderCal();return}
+   if(brush==="x"||PL.col[k]===brush)delete PL.col[k];else PL.col[k]=brush;
+   psave();styleDay(b,k);sumUpdate()};
+  g.appendChild(b)}
  box.appendChild(g);
- const lg=el("p","note","Vert : jour férié en Belgique. Rose : week-end. Point : une note est écrite.");box.appendChild(lg);
- if(pd&&pd.startsWith(PY+"-"+pad(pm))){
+ box.appendChild(el("p","note","",)).id="csum";
+ box.appendChild(el("p","note","Vert clair : jour férié en Belgique. Rose pâle : week-end. Point : une note est écrite."));
+ const dt=el("details","box");dt.appendChild(el("summary",null,"Changer le nom des couleurs"));
+ TAGS.forEach((c,i)=>{const t=el("input");t.type="text";t.maxLength=24;t.value=PL.tn[i];t.setAttribute("aria-label","Nom de la couleur "+(i+1));
+  t.oninput=()=>{PL.tn[i]=t.value.trim()||TN0[i];psave();labs[i].textContent=PL.tn[i];sumUpdate()};dt.appendChild(t)});
+ box.appendChild(dt);
+ sumUpdate();
+ if(brush===null&&pd&&pd.startsWith(PY+"-"+pad(pm))){
   const dd=new Date(PY,pm-1,+pd.slice(8)),bx=el("div","box");
   bx.appendChild(el("b",null,dd.toLocaleDateString("fr-BE",{weekday:"long",day:"numeric",month:"long"})));
   if(HOL[pd]||SPE[pd])bx.appendChild(el("span",null,HOL[pd]||SPE[pd]));
   const ta=el("textarea");ta.placeholder="Un rendez-vous, une idée, une envie…";ta.value=PL.notes[pd]||"";ta.setAttribute("aria-label","Note du jour");
   ta.oninput=()=>{if(ta.value.trim())PL.notes[pd]=ta.value;else delete PL.notes[pd];psave();
-   const s=box.querySelector("button.sel");if(s)s.classList.toggle("dot",!!PL.notes[pd])};
+   const sb=box.querySelector("button.sel");if(sb)sb.classList.toggle("dot",!!PL.notes[pd])};
   bx.appendChild(ta);box.appendChild(bx)}
  if(memo.length){const bx=el("div","box");bx.appendChild(el("b",null,"À retenir ce mois-ci"));memo.forEach(m=>bx.appendChild(el("div",null,m)));box.appendChild(bx)}
  const r=el("div","box");r.appendChild(el("b",null,"Mon rituel du mois : "+PRIT[pm-1][0]));r.appendChild(el("span",null,PRIT[pm-1][1]));box.appendChild(r)}
@@ -515,6 +551,8 @@ const isObj=x=>x&&typeof x==="object"&&!Array.isArray(x);
 function cleanNotes(n){const o={};Object.keys(n).forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&typeof n[k]==="string")o[k]=n[k]});return o}
 function cleanBud(b){const o={};Object.keys(b).forEach(k=>{if(!/^\d{4}-\d{2}$/.test(k)||!isObj(b[k]))return;const m={};
  SEC.forEach(([id,,L])=>{m[id]=Array.isArray(b[k][id])?b[k][id].filter(isObj).map(x=>({l:String(x.l==null?"":x.l),p:String(x.p==null?"":x.p),r:String(x.r==null?"":x.r),f:x.f?1:0})):L.map(l=>({l,p:"",r:"",f:1}))});o[k]=m});return o}
+function cleanCol(c){const o={};Object.keys(c).forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&Number.isInteger(c[k])&&c[k]>=0&&c[k]<5)o[k]=c[k]});return o}
+function cleanTn(t){return Array.isArray(t)&&t.length===5?t.map((x,i)=>String(x==null?"":x).slice(0,24).trim()||TN0[i]):TN0.slice()}
 function cleanTodo(t){const o={};Object.keys(t).forEach(k=>{if(/^\d{4}-\d{2}$/.test(k)&&Array.isArray(t[k]))o[k]=t[k].filter(x=>isObj(x)&&typeof x.t==="string").map(x=>({t:x.t,d:x.d?1:0,s:x.s?1:0}))});return o}
 function saveInfo(){$("#lastbk").textContent=PL.bk?"Dernière sauvegarde : "+new Date(PL.bk).toLocaleDateString("fr-BE",{day:"numeric",month:"long",year:"numeric"})+".":"Tu n’as pas encore fait de sauvegarde."}
 async function doBackup(){
@@ -541,7 +579,7 @@ $("#rfile").onchange=e=>{
  r.onload=()=>{try{
   const o=JSON.parse(r.result),p=o&&o.planner;
   if(!isObj(o)||o.app!=="un-temps-pour-soi"||!isObj(p))throw 0;
-  const np={notes:cleanNotes(isObj(p.notes)?p.notes:{}),bud:cleanBud(isObj(p.bud)?p.bud:{}),todo:cleanTodo(isObj(p.todo)?p.todo:{}),bk:typeof p.bk==="string"?p.bk:""};
+  const np={notes:cleanNotes(isObj(p.notes)?p.notes:{}),bud:cleanBud(isObj(p.bud)?p.bud:{}),todo:cleanTodo(isObj(p.todo)?p.todo:{}),col:cleanCol(isObj(p.col)?p.col:{}),tn:cleanTn(p.tn),bk:typeof p.bk==="string"?p.bk:""};
   const days=Array.isArray(o.pas)?o.pas.filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)):[];
   pend={np,days};
   $("#savemsg").textContent="Sauvegarde lue : "+Object.keys(np.notes).length+" note(s), "+Object.keys(np.bud).length+" mois de budget, "+days.length+" jour(s) de série. Elle remplacera ce qui est écrit sur ce téléphone.";
