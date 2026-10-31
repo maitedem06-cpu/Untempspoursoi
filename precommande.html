@@ -148,6 +148,14 @@
   .entreprise .bouton { background: #6B1214; color: #F2E6D8; }
   .lien-entreprise { display: inline-block; margin-top: 1.1rem; font-size: .95rem; color: var(--doux); }
 
+
+  /* ---------- Jeu suspendu ---------- */
+  .solidaire{background:#FBF5EE;border:1.5px solid #9DAA92;border-radius:22px;padding:1.6rem 1.4rem;margin-top:2rem;text-align:center}
+  .solidaire h3{font-size:1.6rem;margin:.4rem 0 .8rem}
+  .solidaire p{color:var(--doux);margin:0 auto .9rem;max-width:32em}
+  .solidaire .calc{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:.4rem .9rem;background:var(--creme-fonce);border-radius:14px;padding:.7rem 1rem;margin:.3rem 0 1.1rem;font-size:.95rem;color:var(--texte)}
+  .solidaire .calc b{color:var(--bordeaux)}
+
   /* ---------- Instagram ---------- */
   .insta { text-align: center; }
   .insta .qr { width: 180px; margin: 1.5rem auto 1.25rem; padding: 12px; background: #FBF5EE; border-radius: 18px; box-shadow: 0 10px 24px rgba(107, 18, 20, .12); }
@@ -271,6 +279,16 @@
         </div>
       </div>
 
+
+      <div class="solidaire" id="solidaire">
+        <span class="etiquette">Jeu solidaire</span>
+        <h3>Offre un temps pour soi à une femme dans le besoin</h3>
+        <p>Certaines femmes traversent des moments très difficiles et n’ont personne pour penser à elles. Tu peux leur offrir un jeu « Un temps pour soi ». Je l’apporterai moi-même dans une maison d’accueil pour femmes en difficulté.</p>
+        <div class="calc"><span>Tu paies <b>24,90 €</b></span><span>+</span><span>je participe à hauteur de <b>5 €</b></span><span>=</span><span>un jeu offert</span></div>
+        <p>Au moment du paiement, tu peux lui laisser <b>un petit mot doux</b> si tu le souhaites : je l’écrirai à la main sur une carte glissée dans la boîte. Je partagerai ensuite sur Instagram une photo du dépôt des jeux.</p>
+        <!-- À MODIFIER : lien Stripe « jeu solidaire » (24,90 €) -->
+        <a class="bouton" href="https://buy.stripe.com/VOTRE-LIEN-SOLIDAIRE">Offrir un jeu · 24,90 €</a>
+      </div>
       <p class="rassurance centre">Première édition limitée à 250 jeux. Tu reçois une confirmation par e-mail dès ton paiement. Pour la livraison, tu reçois ensuite un numéro de suivi ; pour le retrait, ton jeu t’attend à ton nom au marché.</p>
     </div>
   </section>
