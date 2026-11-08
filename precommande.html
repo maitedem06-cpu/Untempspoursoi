@@ -115,7 +115,7 @@
   /* ---------- Commander ---------- */
   .commander { background: var(--creme-fonce); }
   .options { display: grid; gap: 1rem; margin-top: 1.75rem; }
-  @media (min-width: 620px) { .options { grid-template-columns: 1fr 1fr; } .option.marche { grid-column: 1 / -1; } }
+  @media (min-width: 620px) { .options { grid-template-columns: 1fr 1fr; } .option.marche, .option.france { grid-column: 1 / -1; } }
   .option.marche { border: 1.5px solid var(--sauge); }
   .etiquette { display: inline-block; font-size: .85rem; font-weight: 700; color: #3F4A38; background: #DDE4D6; border-radius: 999px; padding: .2rem .75rem; margin-bottom: .6rem; align-self: flex-start; }
   .option { background: var(--carte); border: 1px solid var(--ligne); border-radius: 18px; padding: 1.5rem; display: flex; flex-direction: column; }
@@ -247,7 +247,7 @@
       <div class="centre">
         <div class="coeur"><span>♥</span></div>
         <h2>Je précommande mon jeu</h2>
-        <p>Viens le chercher au marché de Noël ou fais-le livrer en Belgique avec bpost. Paiement en ligne sécurisé par Bancontact ou carte bancaire.</p>
+        <p>Viens le chercher au marché de Noël ou fais-le livrer en Belgique avec bpost ou en France en point relais. Paiement en ligne sécurisé par Bancontact ou carte bancaire.</p>
       </div>
 
       <div class="options">
@@ -277,6 +277,16 @@
           <!-- Lien Stripe domicile (33,40 €) -->
           <a class="bouton" href="https://buy.stripe.com/14A8wQ9Cr58z9I7d2H97G02">Payer 33,40 €</a>
         </div>
+        <div class="option france">
+          <span class="etiquette">Livraison en France 🇫🇷</span>
+          <h3>En point relais en France</h3>
+          <p>Envoyé avec Mondial Relay au point relais le plus proche de chez toi. Tu peux aussi indiquer un point relais précis lors du paiement.</p>
+          <div class="detail"><span>Jeu</span><span>24,90 €</span></div>
+          <div class="detail"><span>Livraison</span><span>6,90 €</span></div>
+          <div class="total"><span>Total</span><span>31,80 €</span></div>
+          <!-- Lien Stripe point relais France (31,80 €) -->
+          <a class="bouton" href="https://buy.stripe.com/14AcN6cODbwX7zZ9Qv97G06">Payer 31,80 €</a>
+        </div>
       </div>
 
 
@@ -302,7 +312,7 @@
 
       <details>
         <summary>Quand vais-je recevoir mon jeu ?</summary>
-        <p>Au marché de Noël du Musée du Tram, ton jeu t’attend le 12 ou le 13 décembre 2026, selon le jour choisi. Pour la livraison, les jeux partent le 15 décembre 2026. Compte en général 1 à 3 jours ouvrables avec bpost, un peu plus en période de fêtes. Si l’envoi devait être retardé, je te préviens par e-mail et tu peux annuler ta commande avec remboursement complet.</p>
+        <p>Au marché de Noël du Musée du Tram, ton jeu t’attend le 12 ou le 13 décembre 2026, selon le jour choisi. Pour la livraison, les jeux partent le 15 décembre 2026. Compte en général 1 à 3 jours ouvrables avec bpost en Belgique, et 3 à 5 jours ouvrables en point relais en France, un peu plus en période de fêtes. Si l’envoi devait être retardé, je te préviens par e-mail et tu peux annuler ta commande avec remboursement complet.</p>
       </details>
       <details>
         <summary>C’est une bonne idée de cadeau ?</summary>
@@ -310,7 +320,7 @@
       </details>
       <details>
         <summary>Livres-tu en dehors de la Belgique ?</summary>
-        <p>Pour cette précommande, la livraison se fait uniquement en Belgique. Écris-moi si tu habites ailleurs, on trouvera une solution.</p>
+        <p>Oui, je livre aussi en France, en point relais Mondial Relay. Pour les autres pays, écris-moi : on trouvera une solution.</p>
       </details>
       <details>
         <summary>Et si je change d’avis ?</summary>
@@ -362,7 +372,7 @@
     <p>Vosberg 59, 1970 Wezembeek-Oppem, Belgique</p>
     <p>N° d’entreprise / TVA : BE 1018.062.015</p>
     <p><a href="mailto:untempspoursoievasion@outlook.be">untempspoursoievasion@outlook.be</a> · <a href="tel:+32492547269">0492 54 72 69</a></p>
-    <p>Prix TVA comprise. Paiement sécurisé par Stripe. Tes coordonnées servent uniquement au traitement et à la livraison de ta commande.</p>
+    <p>Régime particulier de franchise des petites entreprises : TVA non applicable. Paiement sécurisé par Stripe. Tes coordonnées servent uniquement au traitement et à la livraison de ta commande.</p>
   </div>
 </footer>
 
