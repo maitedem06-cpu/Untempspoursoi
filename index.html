@@ -1103,7 +1103,8 @@ document.querySelectorAll(".seg8 button").forEach(b=>b.addEventListener("click",
 /* ===== Carte du jour : à chaque ouverture, la même carte toute la journée ===== */
 (function(){
  const pool=D.a.map(c=>[c[0],c[1]]).concat(LANG==="fr"?D.p.map(c=>[c[0],""]):[]);
- const k=tday();let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;
+ let sd=null;try{sd=localStorage.getItem("utps_seed");if(!sd){sd=String(Math.floor(Math.random()*1e9));localStorage.setItem("utps_seed",sd)}}catch(e){sd=String(Math.floor(Math.random()*1e9))}
+ const k=tday()+"|"+sd;let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;
  const c=pool[h%pool.length],box=$("#cdj-card");box.innerHTML="";
  const t=document.createElement("div");t.className="t";t.textContent=c[0];box.appendChild(t);
  if(c[1]){const l=document.createElement("div");l.className="l";l.textContent=c[1];box.appendChild(l)}
